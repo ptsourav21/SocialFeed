@@ -1,0 +1,6 @@
+@SocialFeed.Domain_HostAddress = http://localhost:5281
+
+GET {{SocialFeed.Domain_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

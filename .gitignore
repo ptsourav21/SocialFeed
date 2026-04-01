@@ -1,0 +1,79 @@
+# =========================
+# OPERATING SYSTEM SPECIFIC
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# FRONTEND: NODE.JS & NEXT.JS
+# =========================
+# Dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+
+# Next.js Build output
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Environment variables (NEVER COMMIT SECRETS)
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# BACKEND: .NET / C# / VISUAL STUDIO
+# =========================
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider folder
+.vs/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Environment/Configuration specific
+# (Optional: uncomment if you don't want to commit dev settings)
+# */appsettings.Development.json
+
+# Entity Framework Core 
+# (Ignore local SQLite databases if you ever use them for testing)
+*.db
+*.db-shm
+*.db-wal
+
+# =========================
+# MISC
+# =========================
+# Rider / Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Local VS Code settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

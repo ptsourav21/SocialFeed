@@ -1,0 +1,6 @@
+@SocialFeed.Application_HostAddress = http://localhost:5105
+
+GET {{SocialFeed.Application_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22 d17.14
+VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialFeed.Domain", "SocialFeed.Domain\SocialFeed.Domain.csproj", "{DBE4206C-C2F9-406D-88DB-A9211190DF3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialFeed.Application", "SocialFeed.Application\SocialFeed.Application.csproj", "{095B8860-68C3-434D-BD78-26184248706E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialFeed.Infrastructure", "SocialFeed.Infrastructure\SocialFeed.Infrastructure.csproj", "{3AE3CB6C-1A55-4453-953E-C5F1A8762D80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialFeed.API", "SocialFeed.API\SocialFeed.API.csproj", "{7DF4E9FB-2E00-41A2-8C55-5C5F7DD35712}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{DBE4206C-C2F9-406D-88DB-A9211190DF3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBE4206C-C2F9-406D-88DB-A9211190DF3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBE4206C-C2F9-406D-88DB-A9211190DF3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{095B8860-68C3-434D-BD78-26184248706E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{095B8860-68C3-434D-BD78-26184248706E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{095B8860-68C3-434D-BD78-26184248706E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{095B8860-68C3-434D-BD78-26184248706E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AE3CB6C-1A55-4453-953E-C5F1A8762D80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE3CB6C-1A55-4453-953E-C5F1A8762D80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE3CB6C-1A55-4453-953E-C5F1A8762D80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE3CB6C-1A55-4453-953E-C5F1A8762D80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DF4E9FB-2E00-41A2-8C55-5C5F7DD35712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DF4E9FB-2E00-41A2-8C55-5C5F7DD35712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DF4E9FB-2E00-41A2-8C55-5C5F7DD35712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DF4E9FB-2E00-41A2-8C55-5C5F7DD35712}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

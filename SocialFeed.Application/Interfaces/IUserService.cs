@@ -1,6 +1,10 @@
-﻿namespace SocialFeed.Application
+﻿using SocialFeed.Domain;
+
+namespace SocialFeed.Application
 {
-    public class IUserService
+    public interface IUserService
     {
+        Task<User?> GetUserByEmailAsync(string email);
+        Task<User> CreateUserAsync(User user);
     }
 }

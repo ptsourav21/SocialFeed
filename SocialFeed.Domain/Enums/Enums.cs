@@ -1,6 +1,9 @@
 ﻿namespace SocialFeed.Domain
 {
-    public class Enums
+    public enum EnumStatus
     {
+        Regardless = 0,
+        Active = 1,
+        Inactive = 2
     }
 }

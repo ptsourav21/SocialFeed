@@ -37,8 +37,8 @@ namespace SocialFeed.API
                 else
                     _logger.LogInformation("User {UserId} commenting on post {PostId}", userId, request.PostId);
 
-                await _commentService.CreateCommentAsync(userId, request);
-                return Ok(new { Message = "Comment created successfully." });
+                var result = await _commentService.CreateCommentAsync(userId, request);
+                return Ok(result);
             }
             catch (Exception ex)
             {

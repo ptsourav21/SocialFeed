@@ -18,34 +18,85 @@ namespace SocialFeed.Infrastructure
         {
             var posts = await _postDA.GetFeedPostsAsync(currentUserId);
 
-            // This is where the magic happens:
-            return posts.Select(p => new PostResponseDTO
-            {
-                Id = p.ID,
-                AuthorName = p.User.FirstName +" "+ p.User.LastName,
-                Content = p.Content,
-                ImageUrl = p.ImageUrl,
-                CreatedAt = p.CreatedTime,
-                LikesCount = p.Likes.Count,
-                HasLiked = p.Likes.Any(l => l.UserId == currentUserId),
+            return posts.Select(p => {
+                // 1. Get all comments for this post
+                var allComments = p.Comments.ToList();
 
-                // --- CRITICAL PART START ---
-                Comments = p.Comments.Select(c => new CommentResponseDto
+                // 2. Map every comment to a DTO first
+                var commentDtos = allComments.Select(c => new CommentResponseDto
                 {
                     Id = c.ID.ToString(),
                     Content = c.Content,
                     CreatedAt = c.CreatedTime,
-                    // If p.Comments.ThenInclude(c => c.User) worked, this won't be null!
-                    AuthorName = p.User.FirstName + " " + p.User.LastName,
+                    // Use c.User here (the commenter), NOT p.User (the post author)
+                    AuthorName = c.User.FirstName + " " + c.User.LastName,
                     AuthorId = c.UserId.ToString(),
                     LikesCount = 0, // Wire up later
-                    HasLiked = false
-                }).ToList(),
-                // --- CRITICAL PART END ---
+                    HasLiked = false,
+                    Replies = new List<CommentResponseDto>() // Initialize the list
+                }).ToList();
 
-                CommentsCount = p.Comments.Count,
-                IsPublic = p.IsPublic
+                // 3. Build the Tree
+                var rootComments = new List<CommentResponseDto>();
+                var commentLookup = commentDtos.ToDictionary(c => c.Id);
+
+                foreach (var c in allComments)
+                {
+                    var dto = commentLookup[c.ID.ToString()];
+
+                    if (c.ParentCommentId == null)
+                    {
+                        // This is a top-level comment
+                        rootComments.Add(dto);
+                    }
+                    else
+                    {
+                        // This is a reply! Find its parent and add it to the 'Replies' list
+                        var parentIdStr = c.ParentCommentId.ToString();
+                        if (commentLookup.TryGetValue(parentIdStr, out var parentDto))
+                        {
+                            parentDto.Replies ??= new List<CommentResponseDto>();
+                            parentDto.Replies.Add(dto);
+                        }
+                    }
+                }
+
+                return new PostResponseDTO
+                {
+                    Id = p.ID,
+                    UserId = p.UserId,
+                    AuthorName = p.User.FirstName + " " + p.User.LastName,
+                    Content = p.Content,
+                    ImageUrl = p.ImageUrl,
+                    CreatedAt = p.CreatedTime,
+                    LikesCount = p.Likes.Count,
+                    HasLiked = p.Likes.Any(l => l.UserId == currentUserId),
+                    Comments = rootComments, // Only return the Top-Level (Roots)
+                    CommentsCount = allComments.Count,
+                    IsPublic = p.IsPublic
+                };
             }).ToList();
+        }
+
+        // Helper method to recursively map comments and their replies
+        private CommentResponseDto MapComment(Comment c, IEnumerable<Comment> allComments, Guid currentUserId)
+        {
+            return new CommentResponseDto
+            {
+                Id = c.ID.ToString(),
+                Content = c.Content,
+                CreatedAt = c.CreatedTime,
+                // BUG FIX: Use c.User, not p.User (p.User is the Post author!)
+                AuthorName = c.User.FirstName + " " + c.User.LastName,
+                AuthorId = c.UserId.ToString(),
+                LikesCount = 0, // Wire up later
+                HasLiked = false,
+                // 2. Find all comments that have THIS comment as their parent
+                Replies = allComments
+                    .Where(r => r.ParentCommentId == c.ID)
+                    .Select(r => MapComment(r, allComments, currentUserId))
+                    .ToList()
+            };
         }
 
         public async Task<PostResponseDTO> CreatePostAsync(Guid userId, CreatePostDTO request)

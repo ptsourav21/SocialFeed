@@ -6020,3 +6020,16 @@
     margin:0 6px 0 0;
 }
 /*--- chat mobile seetings css end ----*/
+
+/* Vertical line for threaded replies */
+.reply-thread {
+    border-left: 2px solid #e9ecef;
+    margin-left: 20px; /* Moves the reply to the right */
+    padding-left: 15px; /* Space between line and text */
+    margin-top: 10px;
+}
+
+/* Remove gap between the parent comment and its first reply */
+.comment-container {
+    margin-bottom: 8px; 
+}

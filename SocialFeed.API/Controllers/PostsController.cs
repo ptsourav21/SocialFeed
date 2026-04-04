@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace SocialFeed.API
 {
-    [Authorize] // This whole controller requires the user to be logged in!
+    [Authorize] 
     [ApiController]
     [Route("api/[controller]")]
     public class PostsController : ControllerBase

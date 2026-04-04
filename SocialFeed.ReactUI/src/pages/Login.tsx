@@ -22,7 +22,7 @@ export default function Login() {
             
             // On success, redirect to feed (we'll build feed later, so just alert for now)
             alert(`Welcome back, ${response.firstName}!`);
-            // navigate('/feed'); 
+            navigate('/feed'); 
             
         } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

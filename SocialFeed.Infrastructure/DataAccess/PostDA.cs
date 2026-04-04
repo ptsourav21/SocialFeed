@@ -14,6 +14,7 @@ namespace SocialFeed.Infrastructure
                 .Include(p => p.User)
                 .Include(p => p.Likes)
                 .Include(p => p.Comments)
+                .ThenInclude(c => c.User)
                 .Where(p => p.IsPublic || p.UserId == currentUserId)
                 .OrderByDescending(p => p.CreatedTime)
                 .ToListAsync();

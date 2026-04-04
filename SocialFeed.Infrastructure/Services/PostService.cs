@@ -18,18 +18,34 @@ namespace SocialFeed.Infrastructure
         {
             var posts = await _postDA.GetFeedPostsAsync(currentUserId);
 
+            // This is where the magic happens:
             return posts.Select(p => new PostResponseDTO
             {
                 Id = p.ID,
-                UserId = p.UserId,
-                AuthorName = $"{p.User.FirstName} {p.User.LastName}",
+                AuthorName = p.User.FirstName +" "+ p.User.LastName,
                 Content = p.Content,
                 ImageUrl = p.ImageUrl,
                 CreatedAt = p.CreatedTime,
                 LikesCount = p.Likes.Count,
+                HasLiked = p.Likes.Any(l => l.UserId == currentUserId),
+
+                // --- CRITICAL PART START ---
+                Comments = p.Comments.Select(c => new CommentResponseDto
+                {
+                    Id = c.ID.ToString(),
+                    Content = c.Content,
+                    CreatedAt = c.CreatedTime,
+                    // If p.Comments.ThenInclude(c => c.User) worked, this won't be null!
+                    AuthorName = p.User.FirstName + " " + p.User.LastName,
+                    AuthorId = c.UserId.ToString(),
+                    LikesCount = 0, // Wire up later
+                    HasLiked = false
+                }).ToList(),
+                // --- CRITICAL PART END ---
+
                 CommentsCount = p.Comments.Count,
                 IsPublic = p.IsPublic
-            });
+            }).ToList();
         }
 
         public async Task<PostResponseDTO> CreatePostAsync(Guid userId, CreatePostDTO request)
@@ -40,6 +56,7 @@ namespace SocialFeed.Infrastructure
                 Content = request.Content,
                 ImageUrl = request.ImageUrl,
                 IsPublic = request.IsPublic,
+                CreatedTime = DateTime.UtcNow,
                 CreatedBy = userId
             };
 

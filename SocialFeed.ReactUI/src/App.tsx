@@ -1,19 +1,26 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Feed from './pages/Feed';
+import ProtectedRoute from './components/ProtectedRoute'; // Import it here
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Set Login as the default root page */}
         <Route path="/" element={<Login />} />
-        
-        {/* Set Register as a separate route */}
         <Route path="/register" element={<Register />} />
         
-        {/* Placeholder for when we build Feed */}
-        {/* <Route path="/feed" element={<Feed />} /> */}
+        {/* The Protected Route */}
+        <Route 
+          path="/feed" 
+          element={
+            <ProtectedRoute>
+              <Feed />
+            </ProtectedRoute>
+          } 
+        />
+        
       </Routes>
     </BrowserRouter>
   );

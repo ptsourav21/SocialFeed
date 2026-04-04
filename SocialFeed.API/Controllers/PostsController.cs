@@ -1,72 +1,83 @@
-﻿using SocialFeed.Application;
-using SocialFeed.Domain;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SocialFeed.Application;
+using System.Security.Claims;
 
-namespace SocialFeed.Infrastructure
+namespace SocialFeed.API
 {
-    public class PostService : IPostService
+    [Authorize] // This whole controller requires the user to be logged in!
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PostsController : ControllerBase
     {
-        private readonly PostDA _postDA;
-        private readonly UserDA _userDA; // Need this to get Author Name
+        private readonly IPostService _postService;
+        private readonly ILogger<PostsController> _logger;
 
-        public PostService(PostDA postDA, UserDA userDA)
+        public PostsController(IPostService postService, ILogger<PostsController> logger)
         {
-            _postDA = postDA;
-            _userDA = userDA;
+            _postService = postService;
+            _logger = logger;
         }
 
-        public async Task<IEnumerable<PostResponseDTO>> GetFeedAsync(Guid currentUserId)
+        // Helper method to extract the logged-in user's Guid from the JWT Token
+        private Guid GetCurrentUserId()
         {
-            var posts = await _postDA.GetFeedPostsAsync(currentUserId);
-
-            return posts.Select(p => new PostResponseDTO
-            {
-                Id = p.ID,
-                UserId = p.UserId,
-                AuthorName = $"{p.User.FirstName} {p.User.LastName}",
-                Content = p.Content,
-                ImageUrl = p.ImageUrl,
-                CreatedAt = p.CreatedTime,
-                LikesCount = p.Likes.Count,
-                CommentsCount = p.Comments.Count,
-                IsPublic = p.IsPublic
-            });
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.Parse(userIdString!);
         }
 
-        public async Task<PostResponseDTO> CreatePostAsync(Guid userId, CreatePostDTO request)
+        [HttpGet]
+        public async Task<IActionResult> GetFeed()
         {
-            var post = new Post
+            try
             {
-                UserId = userId,
-                Content = request.Content,
-                ImageUrl = request.ImageUrl,
-                IsPublic = request.IsPublic,
-                CreatedBy = userId
-            };
+                var userId = GetCurrentUserId();
+                _logger.LogInformation("Fetching feed for user {UserId}", userId);
 
-            var createdPost = await _postDA.InsertPostAsync(post);
-            // In a real scenario, you'd fetch the user to return the author name immediately
-
-            return new PostResponseDTO
+                var posts = await _postService.GetFeedAsync(userId);
+                return Ok(posts);
+            }
+            catch (Exception ex)
             {
-                Id = createdPost.ID,
-                UserId = createdPost.UserId,
-                Content = createdPost.Content,
-                ImageUrl = createdPost.ImageUrl,
-                CreatedAt = createdPost.CreatedTime,
-                IsPublic = createdPost.IsPublic,
-                LikesCount = 0,
-                CommentsCount = 0
-            };
+                _logger.LogError(ex, "Failed to retrieve feed.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to load feed." });
+            }
         }
 
-        public async Task ToggleLikeAsync(Guid userId, Guid postId)
+        [HttpPost]
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostDTO request)
         {
-            var existingLike = await _postDA.GetPostLikeAsync(userId, postId);
+            try
+            {
+                var userId = GetCurrentUserId();
+                _logger.LogInformation("User {UserId} creating a new post.", userId);
 
-            if (existingLike != null)
-                await _postDA.RemoveLikeAsync(existingLike);
-            else
-                await _postDA.AddLikeAsync(new PostLike { UserId = userId, PostId = postId });
+                var post = await _postService.CreatePostAsync(userId, request);
+                return Ok(post);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create post.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to create post." });
+            }
+        }
+
+        [HttpPost("{postId}/like")]
+        public async Task<IActionResult> ToggleLike(Guid postId)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                await _postService.ToggleLikeAsync(userId, postId);
+
+                _logger.LogInformation("User {UserId} toggled like on post {PostId}.", userId, postId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to toggle like on post {PostId}.", postId);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to process like." });
+            }
         }
     }
 }

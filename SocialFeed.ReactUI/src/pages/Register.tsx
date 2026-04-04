@@ -29,7 +29,7 @@ export default function Register() {
             const response = await authService.register({ firstName, lastName, email, password });
             localStorage.setItem('jwt_token', response.token);
             alert('Registration successful!');
-            // navigate('/feed');
+            navigate('/feed');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
         } finally {

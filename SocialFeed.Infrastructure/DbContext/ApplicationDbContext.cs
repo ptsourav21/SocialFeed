@@ -17,6 +17,34 @@ namespace SocialFeed.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
 
+            // 1. Stop User -> Post cascade delete
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Posts)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // 2. Stop User -> Comment cascade delete (THIS FIXES YOUR ERROR)
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Post -> Comment CAN cascade (If a post is deleted, delete its comments)
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Comment Replies (Prevent infinite loop)
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.ParentComment)
+                .WithMany(c => c.Replies)
+                .HasForeignKey(c => c.ParentCommentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // PostLike Composite Key & Cascade Rules
             modelBuilder.Entity<PostLike>().HasKey(pl => new { pl.UserId, pl.PostId });
             modelBuilder.Entity<PostLike>()
@@ -30,10 +58,6 @@ namespace SocialFeed.Infrastructure
                 .HasOne(cl => cl.Comment).WithMany(c => c.Likes).HasForeignKey(cl => cl.CommentId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<CommentLike>()
                 .HasOne(cl => cl.User).WithMany(u => u.CommentLikes).HasForeignKey(cl => cl.UserId).OnDelete(DeleteBehavior.Restrict);
-
-            // Comment Replies
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.ParentComment).WithMany(c => c.Replies).HasForeignKey(c => c.ParentCommentId).OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

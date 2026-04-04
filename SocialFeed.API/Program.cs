@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using SocialFeed.Application;
 using SocialFeed.Infrastructure;
+using SocialFeed.Application.Services;
 
 #region 1. Logger Configuration (Serilog)
 Log.Logger = new LoggerConfiguration()
@@ -30,7 +31,7 @@ try
     {
         options.AddPolicy("FrontendPolicy", policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.WithOrigins("http://localhost:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();

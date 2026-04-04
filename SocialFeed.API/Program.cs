@@ -76,6 +76,12 @@ try
     builder.Services.AddScoped<UserDA>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+
+    builder.Services.AddScoped<PostDA>();
+    builder.Services.AddScoped<IPostService, PostService>();
+
+    builder.Services.AddScoped<CommentDA>();
+    builder.Services.AddScoped<ICommentService, CommentService>();
     #endregion
 
     #region 5. Authentication Configuration

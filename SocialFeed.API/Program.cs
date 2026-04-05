@@ -31,7 +31,7 @@ try
     {
         options.AddPolicy("FrontendPolicy", policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins("http://localhost:5173", "https://social-feed-react-ui-bxzu.vercel.app")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();

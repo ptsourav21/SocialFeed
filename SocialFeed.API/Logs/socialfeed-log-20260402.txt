@@ -1,0 +1,7 @@
+2026-04-02 14:35:26.432 +06:00 [INF] Starting up the Secure SocialFeed API...
+2026-04-02 14:35:26.563 +06:00 [FTL] The application failed to start correctly.
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at SocialFeed.Infrastructure.EncryptionHelper.Decrypt(String cipherText) in E:\Personal\Projects\SocialFeed\SocialFeed.Infrastructure\Security\EncryptionHelper.cs:line 39
+   at Program.<Main>$(String[] args) in E:\Personal\Projects\SocialFeed\SocialFeed.API\Program.cs:line 66

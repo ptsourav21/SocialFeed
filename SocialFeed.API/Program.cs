@@ -112,15 +112,10 @@ try
     var app = builder.Build();
 
     #region 7. HTTP Request Pipeline (Middleware)
-    if (app.Environment.IsDevelopment())
-    {
-        // Generate the raw OpenAPI JSON document
-        app.MapOpenApi();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 
-        // Serve the modern Scalar interactive UI
-        app.MapScalarApiReference();
-    }
-    else
+    if (!app.Environment.IsDevelopment())
     {
         // Enforce Strict Transport Security in Production
         app.UseHsts();

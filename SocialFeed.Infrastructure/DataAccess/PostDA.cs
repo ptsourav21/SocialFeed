@@ -13,9 +13,13 @@ namespace SocialFeed.Infrastructure
             return await _context.Posts
                 .Include(p => p.User)
                 .Include(p => p.Likes)
+                    .ThenInclude(l => l.User) 
                 .Include(p => p.Comments)
-                .ThenInclude(c => c.User)
-                .Where(p => p.IsPublic || p.UserId == currentUserId)
+                    .ThenInclude(c => c.User)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.CommentLikes) 
+                .Where(p => p.Status == EnumStatus.Active &&
+                   (p.IsPublic == true || p.UserId == currentUserId))
                 .OrderByDescending(p => p.CreatedTime)
                 .ToListAsync();
         }
@@ -42,6 +46,13 @@ namespace SocialFeed.Infrastructure
         {
             _context.PostLikes.Remove(like);
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<string>> GetPostLikersAsync(Guid postId)
+        {
+            return await _context.PostLikes
+                .Where(l => l.PostId == postId)
+                .Select(l => l.User.FirstName + " " + l.User.LastName)
+                .ToListAsync();
         }
     }
 }

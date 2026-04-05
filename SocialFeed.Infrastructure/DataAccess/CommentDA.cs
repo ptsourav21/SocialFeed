@@ -36,5 +36,12 @@ namespace SocialFeed.Infrastructure
             _context.CommentLikes.Remove(like);
             await _context.SaveChangesAsync();
         }
+        public async Task<List<string>> GetCommentLikersAsync(Guid commentId)
+        {
+            return await _context.CommentLikes
+                .Where(l => l.CommentId == commentId)
+                .Select(l => l.User.FirstName + " " + l.User.LastName)
+                .ToListAsync();
+        }
     }
 }

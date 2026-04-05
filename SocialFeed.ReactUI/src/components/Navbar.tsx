@@ -1,10 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode'; // Import the decoder
 
 export default function Navbar() {
     const navigate = useNavigate();
     const [isNotifyOpen, setIsNotifyOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    
+    // State to hold the display name
+    const [displayName, setDisplayName] = useState('My Account');
+
+    useEffect(() => {
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+            try {
+                const decoded: any = jwtDecode(token);
+                
+                const firstName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"] || decoded.given_name;
+                const lastName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"] || decoded.family_name;
+                const userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || decoded.sub;
+
+                if (firstName && lastName) {
+                    setDisplayName(`${firstName} ${lastName}`);
+                } else if (userId) {
+                    setDisplayName(`User: ${userId.substring(0, 8)}...`); 
+                }
+            } catch (error) {
+                console.error("Token decoding failed:", error);
+            }
+        }
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('jwt_token');
@@ -16,7 +41,7 @@ export default function Navbar() {
             <div className="container _custom_container">
                 <div className="_logo_wrap">
                     <Link className="navbar-brand" to="/feed">
-                        <img src="assets/images/logo.svg" alt="Image" className="_nav_logo" />
+                        <img src="assets/images/logo.svg" alt="Logo" className="_nav_logo" />
                     </Link>
                 </div>
                 
@@ -27,7 +52,7 @@ export default function Navbar() {
                                 <circle cx="7" cy="7" r="6" stroke="#666" />
                                 <path stroke="#666" strokeLinecap="round" d="M16 16l-3-3" />
                             </svg>
-                            <input className="form-control me-2 _inpt1" type="search" placeholder="input search text" aria-label="Search" />
+                            <input className="form-control me-2 _inpt1" type="search" placeholder="Search posts..." aria-label="Search" />
                         </form>
                     </div>
                     
@@ -40,7 +65,6 @@ export default function Navbar() {
                             </Link>
                         </li>
                         
-                        {/* Notifications */}
                         <li className="nav-item _header_nav_item">
                             <span onClick={() => setIsNotifyOpen(!isNotifyOpen)} className="nav-link _header_nav_link _header_notify_btn" style={{cursor: 'pointer'}}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="22" fill="none" viewBox="0 0 20 22">
@@ -55,7 +79,7 @@ export default function Navbar() {
                                     <div className="_notifications_drop_box">
                                         <div className="_notification_box">
                                             <div className="_notification_image">
-                                                <img src="assets/images/friend-req.png" alt="Image" className="_notify_img" />
+                                                <img src="assets/images/friend-req.png" alt="Notification" className="_notify_img" />
                                             </div>
                                             <div className="_notification_txt">
                                                 <p className="_notification_para">
@@ -69,13 +93,12 @@ export default function Navbar() {
                         </li>
                     </ul>
                     
-                    {/* Profile */}
                     <div className="_header_nav_profile">
                         <div className="_header_nav_profile_image">
-                            <img src="assets/images/profile.png" alt="Image" className="_nav_profile_img" />
+                            <img src="assets/images/profile.png" alt="Profile" className="_nav_profile_img" />
                         </div>
                         <div className="_header_nav_dropdown">
-                            <p className="_header_nav_para">My Account</p>
+                            <p className="_header_nav_para">{displayName}</p>
                             <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="_header_nav_dropdown_btn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" fill="none" viewBox="0 0 10 6">
                                     <path fill="#112032" d="M5 5l.354.354L5 5.707l-.354-.353L5 5zm4.354-3.646l-4 4-.708-.708 4-4 .708.708zm-4.708 4l-4-4 .708-.708 4 4-.708.708z" />
@@ -91,9 +114,9 @@ export default function Navbar() {
                                             <span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">
                                                     <path stroke="#377DFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6.667 18H2.889A1.889 1.889 0 011 16.111V2.89A1.889 1.889 0 012.889 1h3.778M13.277 14.222L18 9.5l-4.723-4.722M18 9.5H6.667"/>
-                                                </svg>			
+                                                </svg>           
                                             </span>
-                                            Log Out		
+                                            Log Out      
                                         </div>
                                     </button>
                                 </li>

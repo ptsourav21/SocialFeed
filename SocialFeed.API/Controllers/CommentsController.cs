@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace SocialFeed.API
 {
-    [Authorize] // Locked down. Must have a JWT token to comment!
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CommentsController : ControllerBase
@@ -62,6 +62,22 @@ namespace SocialFeed.API
             {
                 _logger.LogError(ex, "Failed to toggle like on comment {CommentId}.", commentId);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to process like." });
+            }
+        }
+
+        [HttpGet("{commentId}/likers")]
+        public async Task<IActionResult> GetCommentLikers(Guid commentId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching likers for comment {CommentId}", commentId);
+                var names = await _commentService.GetCommentLikersAsync(commentId);
+                return Ok(names);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching likers for comment {CommentId}", commentId);
+                return StatusCode(500, new { Message = "An internal error occurred while fetching likers." });
             }
         }
     }

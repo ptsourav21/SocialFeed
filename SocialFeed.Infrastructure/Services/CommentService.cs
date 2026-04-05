@@ -17,7 +17,6 @@ namespace SocialFeed.Application.Services
 
         public async Task<CommentResponseDto> CreateCommentAsync(Guid userId, CreateCommentDTO request)
         {
-            // 1. Fetch user to get the name for the UI
             var user = await _context.Users.FindAsync(userId);
             if (user == null) throw new Exception("User not found");
 
@@ -27,7 +26,6 @@ namespace SocialFeed.Application.Services
                 PostId = request.PostId,
                 UserId = userId,
                 Content = request.Content,
-                // SAFE CHECK: Use the value if it exists, otherwise keep it null
                 ParentCommentId = request.ParentCommentId.HasValue ? request.ParentCommentId.Value : null,
                 CreatedTime = DateTime.UtcNow,
                 Status = EnumStatus.Active
@@ -35,13 +33,12 @@ namespace SocialFeed.Application.Services
 
             await _commentDA.InsertCommentAsync(newComment);
 
-            // 2. Return the DTO so React can show the AuthorName immediately
             return new CommentResponseDto
             {
                 Id = newComment.ID.ToString(),
                 Content = newComment.Content,
                 CreatedAt = newComment.CreatedTime,
-                AuthorName = $"{user.FirstName} {user.LastName}", // String interpolation is cleaner
+                AuthorName = $"{user.FirstName} {user.LastName}",
                 AuthorId = user.ID.ToString(),
                 LikesCount = 0,
                 HasLiked = false,
@@ -68,6 +65,10 @@ namespace SocialFeed.Application.Services
                 };
                 await _commentDA.AddLikeAsync(newLike);
             }
+        }
+        public async Task<List<string>> GetCommentLikersAsync(Guid commentId)
+        {
+            return await _commentDA.GetCommentLikersAsync(commentId);
         }
     }
 }

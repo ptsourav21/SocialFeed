@@ -20,7 +20,6 @@ export default function Login() {
             const response = await authService.login({ email, password });
             localStorage.setItem('jwt_token', response.token);
             
-            // On success, redirect to feed (we'll build feed later, so just alert for now)
             alert(`Welcome back, ${response.firstName}!`);
             navigate('/feed'); 
             

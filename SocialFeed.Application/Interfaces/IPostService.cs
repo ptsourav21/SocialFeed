@@ -5,5 +5,6 @@
         Task<IEnumerable<PostResponseDTO>> GetFeedAsync(Guid currentUserId);
         Task<PostResponseDTO> CreatePostAsync(Guid userId, CreatePostDTO request);
         Task ToggleLikeAsync(Guid userId, Guid postId);
+        Task<List<string>> GetPostLikersAsync(Guid postId);
     }
 }

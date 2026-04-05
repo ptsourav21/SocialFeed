@@ -6008,8 +6008,6 @@
     background:transparent;
     outline:none !important;
 }
-/*---- Comment Reply css end -----*/
-/*--- chat mobile seetings css ----*/
 ._chat_mobile_top {
     display: flex;
     align-items: center;
@@ -6019,17 +6017,19 @@
     height: 30px;
     margin:0 6px 0 0;
 }
-/*--- chat mobile seetings css end ----*/
-
-/* Vertical line for threaded replies */
 .reply-thread {
     border-left: 2px solid #e9ecef;
-    margin-left: 20px; /* Moves the reply to the right */
-    padding-left: 15px; /* Space between line and text */
+    margin-left: 20px; 
+    padding-left: 15px; 
     margin-top: 10px;
 }
-
-/* Remove gap between the parent comment and its first reply */
 .comment-container {
     margin-bottom: 8px; 
+}
+._btn_disabled {
+    background-color: #e9ecef !important;
+    border-color: #dee2e6 !important;
+    color: #adb5bd !important;
+    cursor: not-allowed;
+    pointer-events: none;
 }

@@ -21,9 +21,11 @@ public class JwtProvider : IJwtProvider
     {
         var claims = new Claim[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim("FirstName", user.FirstName)
+        new Claim(JwtRegisteredClaimNames.Sub, user.ID.ToString()),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+        new Claim(ClaimTypes.GivenName, user.FirstName),
+        new Claim(ClaimTypes.Surname, user.LastName),
+        new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}")
         };
 
         var encryptedSecret = _configuration["Jwt:Secret"]!;

@@ -42,7 +42,7 @@ export default function Feed() {
     // 3. Toggle Like State
     const handleToggleLike = async (postId: string) => {
         try {
-            // Optimistic UI Update: Instantly change the state for the user
+            
             setPosts(posts.map(post => {
                 if (post.id === postId) {
                     return {
@@ -54,11 +54,11 @@ export default function Feed() {
                 return post;
             }));
 
-            // Tell the backend to toggle the like
+            
             await postService.togglePostLike(postId);
         } catch (error) {
             console.error("Failed to toggle like", error);
-            // If the API fails, you could reload the posts here to revert the state
+           
         }
     };
 
@@ -81,8 +81,7 @@ export default function Feed() {
                             <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                                 <div className="_layout_middle_wrap">
                                     <div className="_layout_middle_inner">
-                                        
-                                        {/* Stories Strip (Static UI to maintain your design) */}
+                                            {/* Stories Section (Static for now) */}
                                         <div className="_feed_inner_ppl_card _mar_b16">
                                             <div className="row">
                                                 <div className="col-xl-3 col-lg-3 col-md-4 col-sm-4 col">

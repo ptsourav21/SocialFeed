@@ -8,28 +8,20 @@ interface PostCreatorProps {
 export default function PostCreator({ onPostCreated }: PostCreatorProps) {
     const [content, setContent] = useState('');
     const [isPublic, setIsPublic] = useState(true);
-    
-    // NEW: Image Upload States
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // TODO: Paste your ImgBB API Key here!
     const IMGBB_API_KEY = '65d0d3f88513de5bb55a38068bd6637d';
-
-    // Trigger the hidden file input when "Photo" button is clicked
     const handlePhotoButtonClick = () => {
         fileInputRef.current?.click();
     };
 
-    // Handle file selection
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setSelectedImage(e.target.files[0]);
         }
     };
 
-    // The Master Submit Function
     const handleSubmit = async () => {
         if (!content.trim() && !selectedImage) return;
 
@@ -37,7 +29,6 @@ export default function PostCreator({ onPostCreated }: PostCreatorProps) {
         let finalImageUrl = '';
 
         try {
-            // 1. If user selected an image, upload to ImgBB first!
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append('image', selectedImage);
@@ -49,22 +40,19 @@ export default function PostCreator({ onPostCreated }: PostCreatorProps) {
 
                 const data = await response.json();
                 if (data.success) {
-                    finalImageUrl = data.data.url; // We got the live CDN URL!
+                    finalImageUrl = data.data.url;
                 } else {
                     alert('Image upload failed via ImgBB.');
                     setIsUploading(false);
                     return;
                 }
             }
-
-            // 2. Send the text and the new ImgBB URL back to the Feed page
             onPostCreated({ 
                 content: content, 
                 isPublic: isPublic,
                 imageUrl: finalImageUrl 
             });
             
-            // 3. Reset the UI
             setContent('');
             setSelectedImage(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -124,7 +112,7 @@ export default function PostCreator({ onPostCreated }: PostCreatorProps) {
                         style={{ display: 'none' }} 
                     />
 
-                    {/* Photo Button (Now wired to open file picker) */}
+                    {/* Photo Button*/}
                     <div className="_feed_inner_text_area_bottom_photo _feed_common">
                         <button 
                             type="button" 

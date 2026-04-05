@@ -17,47 +17,74 @@ namespace SocialFeed.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
 
-            // 1. Stop User -> Post cascade delete
-            modelBuilder.Entity<Post>()
-                .HasOne(p => p.User)
-                .WithMany(u => u.Posts)
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // --- 1. POST CONFIGURATION ---
+            modelBuilder.Entity<Post>(entity =>
+            {
+                entity.HasOne(p => p.User)
+                      .WithMany(u => u.Posts)
+                      .HasForeignKey(p => p.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // 2. Stop User -> Comment cascade delete (THIS FIXES YOUR ERROR)
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.User)
-                .WithMany(u => u.Comments)
-                .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // --- 2. COMMENT CONFIGURATION ---
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                // Post -> Comment
+                entity.HasOne(c => c.Post)
+                      .WithMany(p => p.Comments)
+                      .HasForeignKey(c => c.PostId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
-            // Post -> Comment CAN cascade (If a post is deleted, delete its comments)
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.Post)
-                .WithMany(p => p.Comments)
-                .HasForeignKey(c => c.PostId)
-                .OnDelete(DeleteBehavior.Cascade);
+                // User -> Comment
+                entity.HasOne(c => c.User)
+                      .WithMany(u => u.Comments)
+                      .HasForeignKey(c => c.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-            // Comment Replies (Prevent infinite loop)
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.ParentComment)
-                .WithMany(c => c.Replies)
-                .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                // Parent -> Replies
+                entity.HasOne(c => c.ParentComment)
+                      .WithMany(c => c.Replies)
+                      .HasForeignKey(c => c.ParentCommentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // PostLike Composite Key & Cascade Rules
-            modelBuilder.Entity<PostLike>().HasKey(pl => new { pl.UserId, pl.PostId });
-            modelBuilder.Entity<PostLike>()
-                .HasOne(pl => pl.Post).WithMany(p => p.Likes).HasForeignKey(pl => pl.PostId).OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<PostLike>()
-                .HasOne(pl => pl.User).WithMany(u => u.PostLikes).HasForeignKey(pl => pl.UserId).OnDelete(DeleteBehavior.Restrict);
+            // --- 3. POST LIKE (Working with BaseObject) ---
+            modelBuilder.Entity<PostLike>(entity =>
+            {
+                entity.HasKey(pl => pl.ID);
 
-            // CommentLike Composite Key & Cascade Rules
-            modelBuilder.Entity<CommentLike>().HasKey(cl => new { cl.UserId, cl.CommentId });
-            modelBuilder.Entity<CommentLike>()
-                .HasOne(cl => cl.Comment).WithMany(c => c.Likes).HasForeignKey(cl => cl.CommentId).OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<CommentLike>()
-                .HasOne(cl => cl.User).WithMany(u => u.CommentLikes).HasForeignKey(cl => cl.UserId).OnDelete(DeleteBehavior.Restrict);
+                // Ensure a user can only like a post ONCE
+                entity.HasIndex(pl => new { pl.UserId, pl.PostId }).IsUnique();
+
+                entity.HasOne(pl => pl.Post)
+                      .WithMany(p => p.Likes)
+                      .HasForeignKey(pl => pl.PostId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pl => pl.User)
+                      .WithMany(u => u.PostLikes)
+                      .HasForeignKey(pl => pl.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // --- 4. COMMENT LIKE  ---
+            modelBuilder.Entity<CommentLike>(entity =>
+            {
+                entity.HasKey(cl => cl.ID);
+
+                // Ensure a user can only like a comment ONCE
+                entity.HasIndex(cl => new { cl.UserId, cl.CommentId }).IsUnique();
+
+                entity.HasOne(cl => cl.Comment)
+                      .WithMany(c => c.CommentLikes)
+                      .HasForeignKey(cl => cl.CommentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(cl => cl.User)
+                      .WithMany(u => u.CommentLikes)
+                      .HasForeignKey(cl => cl.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
         }
     }
 }

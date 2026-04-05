@@ -16,9 +16,13 @@ export const commentService = {
         await axiosClient.post(`/api/comments/${commentId}/like`);
     },
 
-    // New: Get names of people who liked a comment
     getCommentLikes: async (commentId: string): Promise<{fullName: string}[]> => {
         const response = await axiosClient.get(`/api/comments/${commentId}/likes`);
         return response.data;
+    },
+
+    getCommentLikers: async (commentId: string): Promise<string[]> => {
+    const response = await axiosClient.get(`/api/comments/${commentId}/likers`);
+    return response.data;
     }
 };

@@ -19,7 +19,6 @@ namespace SocialFeed.API
             _logger = logger;
         }
 
-        // Helper method to extract the logged-in user's Guid from the JWT Token
         private Guid GetCurrentUserId()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -77,6 +76,22 @@ namespace SocialFeed.API
             {
                 _logger.LogError(ex, "Failed to toggle like on post {PostId}.", postId);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Failed to process like." });
+            }
+        }
+
+        [HttpGet("{postId}/likers")]
+        public async Task<IActionResult> GetPostLikers(Guid postId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching likers for post {PostId}", postId);
+                var names = await _postService.GetPostLikersAsync(postId);
+                return Ok(names);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching likers for post {PostId}", postId);
+                return StatusCode(500, new { Message = "An internal error occurred while fetching likers." });
             }
         }
     }

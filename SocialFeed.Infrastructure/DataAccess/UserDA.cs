@@ -11,7 +11,11 @@ namespace SocialFeed.Infrastructure
         {
             _context = context;
         }
-
+        public async Task<User?> GetUserByIdAsync(Guid id)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.ID == id && u.Status == EnumStatus.Active);
+        }
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users

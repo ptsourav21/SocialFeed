@@ -6,7 +6,7 @@ namespace SocialFeed.Infrastructure
     public class PostService : IPostService
     {
         private readonly PostDA _postDA;
-        private readonly UserDA _userDA; // Need this to get Author Name
+        private readonly UserDA _userDA;
 
         public PostService(PostDA postDA, UserDA userDA)
         {
@@ -19,24 +19,21 @@ namespace SocialFeed.Infrastructure
             var posts = await _postDA.GetFeedPostsAsync(currentUserId);
 
             return posts.Select(p => {
-                // 1. Get all comments for this post
                 var allComments = p.Comments.ToList();
 
-                // 2. Map every comment to a DTO first
                 var commentDtos = allComments.Select(c => new CommentResponseDto
                 {
                     Id = c.ID.ToString(),
                     Content = c.Content,
                     CreatedAt = c.CreatedTime,
-                    // Use c.User here (the commenter), NOT p.User (the post author)
                     AuthorName = c.User.FirstName + " " + c.User.LastName,
                     AuthorId = c.UserId.ToString(),
-                    LikesCount = 0, // Wire up later
-                    HasLiked = false,
-                    Replies = new List<CommentResponseDto>() // Initialize the list
+                    LikesCount = c.CommentLikes?.Count ?? 0,
+                    HasLiked = c.CommentLikes?.Any(l => l.UserId == currentUserId) ?? false,
+                    Replies = new List<CommentResponseDto>()
                 }).ToList();
 
-                // 3. Build the Tree
+                // 2. Build the Tree
                 var rootComments = new List<CommentResponseDto>();
                 var commentLookup = commentDtos.ToDictionary(c => c.Id);
 
@@ -46,16 +43,13 @@ namespace SocialFeed.Infrastructure
 
                     if (c.ParentCommentId == null)
                     {
-                        // This is a top-level comment
                         rootComments.Add(dto);
                     }
                     else
                     {
-                        // This is a reply! Find its parent and add it to the 'Replies' list
                         var parentIdStr = c.ParentCommentId.ToString();
                         if (commentLookup.TryGetValue(parentIdStr, out var parentDto))
                         {
-                            parentDto.Replies ??= new List<CommentResponseDto>();
                             parentDto.Replies.Add(dto);
                         }
                     }
@@ -71,32 +65,11 @@ namespace SocialFeed.Infrastructure
                     CreatedAt = p.CreatedTime,
                     LikesCount = p.Likes.Count,
                     HasLiked = p.Likes.Any(l => l.UserId == currentUserId),
-                    Comments = rootComments, // Only return the Top-Level (Roots)
+                    Comments = rootComments.OrderByDescending(c => c.CreatedAt).ToList(),
                     CommentsCount = allComments.Count,
                     IsPublic = p.IsPublic
                 };
             }).ToList();
-        }
-
-        // Helper method to recursively map comments and their replies
-        private CommentResponseDto MapComment(Comment c, IEnumerable<Comment> allComments, Guid currentUserId)
-        {
-            return new CommentResponseDto
-            {
-                Id = c.ID.ToString(),
-                Content = c.Content,
-                CreatedAt = c.CreatedTime,
-                // BUG FIX: Use c.User, not p.User (p.User is the Post author!)
-                AuthorName = c.User.FirstName + " " + c.User.LastName,
-                AuthorId = c.UserId.ToString(),
-                LikesCount = 0, // Wire up later
-                HasLiked = false,
-                // 2. Find all comments that have THIS comment as their parent
-                Replies = allComments
-                    .Where(r => r.ParentCommentId == c.ID)
-                    .Select(r => MapComment(r, allComments, currentUserId))
-                    .ToList()
-            };
         }
 
         public async Task<PostResponseDTO> CreatePostAsync(Guid userId, CreatePostDTO request)
@@ -110,9 +83,8 @@ namespace SocialFeed.Infrastructure
                 CreatedTime = DateTime.UtcNow,
                 CreatedBy = userId
             };
-
+            var user = await _userDA.GetUserByIdAsync(userId);
             var createdPost = await _postDA.InsertPostAsync(post);
-            // In a real scenario, you'd fetch the user to return the author name immediately
 
             return new PostResponseDTO
             {
@@ -122,6 +94,7 @@ namespace SocialFeed.Infrastructure
                 ImageUrl = createdPost.ImageUrl,
                 CreatedAt = createdPost.CreatedTime,
                 IsPublic = createdPost.IsPublic,
+                AuthorName = user.FirstName + " " + user.LastName,
                 LikesCount = 0,
                 CommentsCount = 0
             };
@@ -135,6 +108,11 @@ namespace SocialFeed.Infrastructure
                 await _postDA.RemoveLikeAsync(existingLike);
             else
                 await _postDA.AddLikeAsync(new PostLike { UserId = userId, PostId = postId });
+        }
+
+        public async Task<List<string>> GetPostLikersAsync(Guid postId)
+        {
+            return await _postDA.GetPostLikersAsync(postId);
         }
     }
 }

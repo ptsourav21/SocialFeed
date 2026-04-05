@@ -96,7 +96,7 @@ The project is architected to transition from a single-server instance to a dist
 4. Press **F5** to launch the API and view the Swagger documentation.
 
 ### Frontend (Vite)
-1. Navigate to the client directory: `cd SocialFeed.Client`.
+1. Navigate to the client directory: `cd SocialFeed.ReactUI`.
 2. Install dependencies: `npm install`.
 3. Start the development server: `npm run dev`.
 
